@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Linq;
 public class main : MonoBehaviour
 {
     imaginaryplane ImaginaryPlane;
@@ -10,15 +10,24 @@ public class main : MonoBehaviour
 
     public GameObject circlePrefab;
 
+    GameObject EasyWay;
+
     GameObject CircleObject;
 
-    float top, bottom, right, left;
+    public float top, bottom, right, left;
 
-    float circleSpace;
+    public float circleSpace;
 
     float FirstPosCon;
 
-    
+    float DifferenceH=0;
+
+    float yIncerease = 0; float xIncerease = 0;
+
+    float Howmanyholder;
+
+    public float PositionConX=0,PositionConY=0;
+
 
     Vector2 CirclesPos;
 
@@ -30,13 +39,15 @@ public class main : MonoBehaviour
     {
         ImaginaryPlane = Camera.main.GetComponent<imaginaryplane>();
         //
+        EasyWay = GameObject.FindGameObjectWithTag("key");
+        //
         bottom = ImaginaryPlane.Bottom;
         right = ImaginaryPlane.Right;
         left = ImaginaryPlane.Left;
         top = ImaginaryPlane.Top;
         //
         FirstPosCon = Mathf.Abs((2*left) / 3);
-       
+        
         //
         SpaceFinder();
         
@@ -45,82 +56,122 @@ public class main : MonoBehaviour
     }
 
 
-    void SpawnCircles()
+    void SpawnCirclesX()
     {
 
         //Debug.Log(left); Debug.Log(bottom); Debug.Log(right); Debug.Log(top);
-        ScaleCon();
-        float yIncerease = 0; float xIncerease = 0;
-       
+        //scale yap
+        //x ve y de artış durumları
+
         for (int j = 0; j < howmanyy; j++)
         {
-
+            DifferenceH = FirstPosCon - circleSpace;//merkezi nokta sıfır sıfır kalsın diye
             for (int i = 0; i < howmanyx; i++)
             {
-
-
-                // CirclesPos = new Vector2(left + xIncerease + (circleSpace / 2),
-                //   (top - yIncerease) - (-circleSpace / 2) - FirstPosCon);
-                CirclesPos = new Vector2( xIncerease -FirstPosCon,
-                   ( - yIncerease)+ FirstPosCon);
-
-
+             
+                CirclesPos = new Vector2(left + xIncerease + (circleSpace / 2),
+            ((-yIncerease) + FirstPosCon) - DifferenceH+PositionConY);
+                //
                 xIncerease = circleSpace + xIncerease;
+                //
                 GameObject circleelement = Instantiate(circlePrefab, CirclesPos, Quaternion.identity);
-
                 Circles.Add(circleelement);
+                //
+                circleelement.transform.parent = EasyWay.transform;
 
             }
-            xIncerease = 0;
-            yIncerease = yIncerease + circleSpace;
+            xIncerease = 0;//x başlangış koşuluna dönüş
+            yIncerease = yIncerease + circleSpace;//y de artış
         }
-        circlePrefab.transform.localScale = new Vector2(1,1);
+        yIncerease = 0;
+        circlePrefab.transform.localScale = new Vector2(1,1);//prefab default scale
     }
+
+    void SpawnCirclesY()
+    {
+
+        //Debug.Log(left); Debug.Log(bottom); Debug.Log(right); Debug.Log(top);
+        //scale yap
+        //x ve y de artış durumları
+
+        for (int j = 0; j < howmanyx; j++)
+        {
+            DifferenceH = FirstPosCon - circleSpace;//merkezi nokta sıfır sıfır kalsın diye
+            for (int i = 0; i < howmanyy; i++)
+            {
+
+                // CirclesPos = new Vector2(xIncerease  + DifferenceH-FirstPosCon-PositionConX ,
+                // (-yIncerease) +FirstPosCon + DifferenceH - (circleSpace/4));
+                CirclesPos = new Vector2(left + xIncerease + (circleSpace / 2),
+                ((-yIncerease) + FirstPosCon) - DifferenceH + PositionConY);
+
+                //
+                xIncerease = circleSpace + xIncerease;
+                //
+                GameObject circleelement = Instantiate(circlePrefab, CirclesPos, Quaternion.identity);
+                Circles.Add(circleelement);
+                //
+                circleelement.transform.parent = EasyWay.transform;
+            }
+            xIncerease = 0;//x başlangış koşuluna dönüş
+            yIncerease = yIncerease + circleSpace;//y de artış
+        }
+        yIncerease = 0;
+        //
+        circlePrefab.transform.localScale = new Vector2(1, 1);//prefab default scale
+    }
+
+
 
     public void SpaceFinder()
     {
 
-        if (howmanyx >= howmanyy || howmanyy == 4)
+        if (howmanyx > howmanyy)
         {
-
+            EasyWay.transform.eulerAngles = new Vector3(0, 0, 0);
             circleSpace = Mathf.Abs((left * 2) / howmanyx);
-        }
-        else
-        {
+            Howmanyholder = howmanyx;
+            ScaleCon();
+            SpawnCirclesX();
+            Rotate();
 
+        }
+        else if(howmanyx < howmanyy)
+        {
             circleSpace = Mathf.Abs((left * 2) / howmanyy);
-
-        }
-       // circleSpace = Mathf.Abs((left * 2) / howmanyx);
-            SpawnCircles();
-
-            
-        
-    }
-    void FindPos()
-    {
-       /* if (howmanyx >= howmanyy)
-        {
-            Vector2 CirclesPos = new Vector2(left + xIncerease + (circleSpace / 2),
-                (top - yIncerease) - (-circleSpace / 2) - FirstPosCon);
-           
+            Howmanyholder = howmanyy;
+            ScaleCon();
+            SpawnCirclesY();
+            Rotate();
         }
         else
         {
+
             circleSpace = Mathf.Abs((left * 2) / howmanyx);
-            SpawnCircles();
+            Howmanyholder = howmanyx;
+            ScaleCon();
+            SpawnCirclesX();
 
-        }*/
+        }
+
     }
-
+    void Rotate()
+    {
+        EasyWay.transform.eulerAngles = new Vector3(0,0,90); Debug.Log(left);
+    }
     void ScaleCon()
     {
 
-        Vector2 ScaleVector = new Vector2(3 / howmanyx, 3 / howmanyx);
-        circlePrefab.transform.localScale = ScaleVector;
+       
+            Vector2 ScaleVector = new Vector2(3 / Howmanyholder, 3 / Howmanyholder);
+            circlePrefab.transform.localScale = ScaleVector;
+
+
+ 
         //y de fazla ise how many y ye böl
 
     }
+
 
 
 }
